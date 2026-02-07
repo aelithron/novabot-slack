@@ -1,0 +1,17 @@
+{
+  "name": "novabot-slack",
+  "version": "1.0.0",
+  "description": "Nova's personal Slack bot! :3",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "Nova",
+  "type": "module",
+  "license": "MIT",
+  "dependencies": {
+    "@slack/bolt": "^4.6.0",
+    "dotenv": "^17.2.4"
+  }
+}
