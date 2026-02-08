@@ -24,9 +24,13 @@ async function startApp() {
   app.logger.setName("novabot-slack");
   const selfInfo = await app.client.auth.test();
   app.logger.info(`is ready as ${selfInfo.user} (${selfInfo.user_id}) :D`);
-  app.message("NovaBot Testing", async ({ message, say }) => {
-    // @ts-expect-error - message.thread_ts does exist
-    say({ text: "test working :3", thread_ts: message.thread_ts || message.ts });
+  app.message(async ({ message, client }) => {
+    if ((message as unknown as { thread_ts: string }).thread_ts) {
+      const originalMsg = await client.conversations.history({ channel: message.channel, latest: (message as unknown as { thread_ts: string }).thread_ts, inclusive: true, limit: 1 });
+      if (originalMsg.ok && originalMsg.messages?.length === 1 && originalMsg.messages[0]?.text?.match(/!subteam\^([A-Z0-9]+)/)) {
+        await client.chat.postEphemeral({ text: "hey! please don't thread on user group mentions :3", channel: message.channel, user: (message as unknown as { user: string }).user, thread_ts: (message as unknown as { thread_ts: string }).thread_ts || message.ts });
+      }
+    }
   });
 }
 startApp();
