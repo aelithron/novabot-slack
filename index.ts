@@ -37,13 +37,21 @@ async function startApp() {
   app.message(":thread:", async ({ message, say }) => {
     if (message.type === "message" && message.subtype === undefined && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
   });
-  
-  app.action("public_daily_recap", async ({ action, ack }) => {
+
+  app.action("public_daily_recap", async ({ action, ack, body, client }) => {
     ack();
-    if (action.type !== "button") return;
-    action.value
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (body.user.id !== "U08RJ1PEM7X") {
+      client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      return;
+    }
+    await client.chat.update({
+      channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: "hi <@U08RJ1PEM7X>, daily recap time! how was your day? :3"
+    });
+    await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
+    await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
-  //await dailyRecap(app);
+  await dailyRecap(app);
 }
 startApp();
