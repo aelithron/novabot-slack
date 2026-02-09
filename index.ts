@@ -37,6 +37,13 @@ async function startApp() {
   app.message(":thread:", async ({ message, say }) => {
     if (message.type === "message" && message.subtype === undefined && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
   });
+  
+  app.action("public_daily_recap", async ({ action, ack }) => {
+    ack();
+    if (action.type !== "button") return;
+    action.value
+  });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
+  //await dailyRecap(app);
 }
 startApp();
