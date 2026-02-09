@@ -1,5 +1,7 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
+import nodeCron from "node-cron";
+import dailyRecap from "./recaps.js";
 
 let app: App;
 async function startApp() {
@@ -35,5 +37,6 @@ async function startApp() {
   app.message(":thread:", async ({ message, say }) => {
     if (message.type === "message" && message.subtype === undefined && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
   });
+  nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
 }
 startApp();
