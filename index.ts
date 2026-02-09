@@ -1,7 +1,7 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
 import nodeCron from "node-cron";
-import dailyRecap from "./recaps.js";
+import dailyRecap, { privateRecap } from "./recaps.js";
 
 let app: App;
 async function startApp() {
@@ -45,13 +45,26 @@ async function startApp() {
       client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }
-    await client.chat.update({
-      channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: "hi <@U08RJ1PEM7X>, daily recap time! how was your day? :3"
-    });
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: "hi <@U08RJ1PEM7X>, daily recap time! how was your day? :3" });
     await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
+    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: body.message!.ts });
+    await privateRecap(app, permaLink.permalink);
+  });
+  app.action("private_daily_recap", async ({ action, ack, body, client }) => {
+    ack();
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (body.user.id !== "U08RJ1PEM7X") {
+      client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      return;
+    }
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: `<@U08RJ1PEM7X>, private recap time! :3${(action.value && action.value !== "") ? `\nwhile you wait, you can look at <${action.value}|the public recap>!` : ""}` });
+    await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
+    await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
+    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: body.message!.ts });
+    await client.chat.postMessage({ channel: body.channel!.id, text: `:cat_heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam|S0AEHJ45EHE>` });
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
-  await dailyRecap(app);
+  //await dailyRecap(app);
 }
 startApp();
