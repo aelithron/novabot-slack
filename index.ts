@@ -45,7 +45,7 @@ async function startApp() {
       client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }
-    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: "hi <@U08RJ1PEM7X>, daily recap time! how was your day? :3" });
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
     await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
@@ -59,7 +59,7 @@ async function startApp() {
       client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }
-    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: `<@U08RJ1PEM7X>, private recap time! :3${(action.value && action.value !== "") ? `\nwhile you wait, you can look at <${action.value}|the public recap>!` : ""}` });
+    await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
     await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
