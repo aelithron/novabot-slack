@@ -23,7 +23,8 @@ async function startApp() {
     app = new App({
       token: process.env.SLACK_BOT_TOKEN,
       socketMode: false,
-      signingSecret: process.env.SLACK_SIGNING_SECRET
+      signingSecret: process.env.SLACK_SIGNING_SECRET,
+      port: Number.parseInt(process.env.PORT || "3000")
     });
   }
   await app.start();

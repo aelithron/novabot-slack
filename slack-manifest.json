@@ -1,0 +1,51 @@
+{
+    "display_information": {
+        "name": "novatea",
+        "description": "nova's personal bot! :3",
+        "background_color": "#923ac2",
+        "long_description": "novatea is nova's personal bot! it has many cool features, including:\r\n- daily recaps (both public and private)\r\n- reminding people not to thread on ping group mentions\r\n- requesting to join private channels\r\n\r\ngithub: https://github.com/aelithron/novabot-slack\r\npfp: https://picrew.me/image_maker/1904634"
+    },
+    "features": {
+        "bot_user": {
+            "display_name": "novatea",
+            "always_online": false
+        },
+        "slash_commands": [
+            {
+                "command": "/spacetime",
+                "description": "Ask to join Nova's T2 channel",
+                "should_escape": false
+            }
+        ]
+    },
+    "oauth_config": {
+        "scopes": {
+            "bot": [
+                "channels:history",
+                "channels:write.invites",
+                "chat:write",
+                "commands",
+                "emoji:read",
+                "groups:history",
+                "groups:write",
+                "reactions:write",
+                "usergroups:read",
+                "groups:read"
+            ]
+        }
+    },
+    "settings": {
+        "event_subscriptions": {
+            "bot_events": [
+                "message.channels",
+                "message.groups"
+            ]
+        },
+        "interactivity": {
+            "is_enabled": true
+        },
+        "org_deploy_enabled": false,
+        "socket_mode_enabled": true,
+        "token_rotation_enabled": false
+    }
+}

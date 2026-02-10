@@ -11,4 +11,8 @@ RUN pnpm add --global typescript
 RUN pnpm run build
 COPY dist/ ./
 COPY example.config.json ./
-CMD ["node", "dist/index.js"]
+
+EXPOSE 3000
+ENV PORT 3000
+LABEL org.opencontainers.image.source="https://github.com/aelithron/novabot-slack"
+CMD ["node", "index.js"]
