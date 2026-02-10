@@ -69,6 +69,10 @@ async function startApp() {
 
   app.command("/spacetime", async ({ command, ack, client }) => {
     ack();
+    if ((await client.conversations.members({ channel: "C0ADRH7KXN1" })).members!.includes(command.user_id)) {
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: "you're already in <#C0ADRH7KXN1>! :3" });
+      return;
+    }
     await client.chat.postMessage({
       channel: "C0ADRH7KXN1", text: `hey <@U08RJ1PEM7X>! <@${command.user_id}> is requesting to join <#C0ADRH7KXN1>.`, blocks: [
         { type: "section", text: { type: "mrkdwn", text: `hey <@U08RJ1PEM7X>! <@${command.user_id}> is requesting to join <#C0ADRH7KXN1>.` } },
@@ -80,6 +84,7 @@ async function startApp() {
         }
       ]
     });
+    await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: "_you stand at the door and begin turning the knob..._\nyour request has been sent! i will dm you when it has been decided." });
   });
   app.action(/^spacetime_(allow|reject)/, async ({ action, ack, body, client }) => {
     ack();
@@ -99,6 +104,7 @@ async function startApp() {
       } catch (e) {
         app.logger.error(`Couldn't invite ${action.value} to ${body.channel!.id}!\n${e}`);
         await client.chat.postEphemeral({ text: "error adding the user to the channel :(", channel: body.channel!.id, user: body.user.id });
+        return;
       }
       blocks.push({ type: "section", text: { type: "mrkdwn", text: ":white_check_mark: _the door creaks open..._" } });
       await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
@@ -106,7 +112,7 @@ async function startApp() {
     } else if (body.actions[0]?.action_id === "spacetime_reject") {
       blocks.push({ type: "section", text: { type: "mrkdwn", text: ":x: _the door remains locked..._" } });
       await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
-      await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> was denied.` });
+      await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (nova's private channel) was denied.` });
     } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
