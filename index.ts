@@ -48,7 +48,8 @@ async function startApp() {
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: "hi <@U08RJ1PEM7X>, daily recap time! how was your day? :3" });
     await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
-    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: body.message!.ts });
+    const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
+    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === "U08RJ1PEM7X") || { ts: undefined }).ts || body.message!.ts) });
     await privateRecap(app, permaLink.permalink);
   });
   app.action("private_daily_recap", async ({ action, ack, body, client }) => {
@@ -61,10 +62,11 @@ async function startApp() {
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: [], text: `<@U08RJ1PEM7X>, private recap time! :3${(action.value && action.value !== "") ? `\nwhile you wait, you can look at <${action.value}|the public recap>!` : ""}` });
     await client.reactions.remove({ channel: body.channel!.id, timestamp: body.message!.ts, name: "zzz" });
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
-    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: body.message!.ts });
-    await client.chat.postMessage({ channel: body.channel!.id, text: `:cat_heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam|S0AEHJ45EHE>` });
+    const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
+    const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === "U08RJ1PEM7X") || { ts: undefined }).ts || body.message!.ts) });
+    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam^S0AEHJ45EHE>` });
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
-  //await dailyRecap(app);
+  await dailyRecap(app);
 }
 startApp();
