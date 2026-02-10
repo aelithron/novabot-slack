@@ -47,7 +47,7 @@ async function startApp() {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (body.user.id !== config.owner.userID) {
-      await client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: `only nova can complete daily recaps, silly :sillybleh:`, channel: body.channel!.id, user: body.user.id });
       return;
     }
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
@@ -120,8 +120,8 @@ async function startApp() {
       await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (nova's private channel) was denied.` });
     } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
-  nodeCron.schedule("0 20 22 * * *", async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: "hii nova! your daily recap is in 10 minutes, you may want to get ready to send it!" }), { timezone: "America/Denver" });
-  nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
+  if (config.recapReminderCron) nodeCron.schedule(config.recapReminderCron, async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: "hii nova! your daily recap is in 10 minutes, you may want to get ready to send it!" }), { timezone: config.owner.timezone });
+  nodeCron.schedule(config.recapCron, async () => await dailyRecap(app), { timezone: config.owner.timezone });
   //await dailyRecap(app);
 }
 startApp();

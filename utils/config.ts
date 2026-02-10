@@ -7,12 +7,15 @@ import { getApp } from "../index.js";
 export const Config = z.object({
   owner: z.object({
     userID: z.string(),
-    email: z.string()
+    email: z.string(),
+    timezone: z.string()
   }),
   channels: z.object({
     public: z.string(),
     private: z.string()
-  })
+  }),
+  recapCron: z.string(),
+  recapReminderCron: z.string().nullable()
 });
 export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
   const configPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../config/config.json');

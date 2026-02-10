@@ -1,10 +1,13 @@
 {
   "owner": {
     "userID": "U08RJ1PEM7X",
-    "email": "aelithron@gmail.com"
+    "email": "aelithron@gmail.com",
+    "timezone": "America/Denver"
   },
   "channels": {
     "public": "C0ADSBWENAY",
     "private": "C0ADRH7KXN1"
-  }
+  },
+  "recapCron": "0 30 22 * * *",
+  "recapReminderCron": "0 20 22 * * *"
 }
