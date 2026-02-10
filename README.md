@@ -5,7 +5,8 @@ This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com
 ## Features
 ### Daily Recaps
 The bot automatically posts a public message for me to talk about how my day went. It also automatically shows my status from [Universal Status](https://status.novatea.dev), a previous project of mine. \
-Once I respond to the public recap and mark it as done, it automatically posts a message in my private channel for me to give a more detailed recap.
+Once I respond to the public recap and mark it as done, it automatically posts a message in my private channel for me to give a more detailed recap. \
+The bot also reminds me 10 minutes before a recap, so I can prepare and send it on time.
 ### Channel Requests
 A command (by default `/spacetime`) lets users request to join my private channel. This was inspired by join workflows in the Hack Club Slack, but mine has the ability to deny channel invites as well. It also doesn't allow users already in the channel to request to join it (which just produces unnecessary messages).
 ### Ping Reminders
