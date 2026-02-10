@@ -42,7 +42,7 @@ async function startApp() {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (body.user.id !== "U08RJ1PEM7X") {
-      client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
@@ -56,7 +56,7 @@ async function startApp() {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (body.user.id !== "U08RJ1PEM7X") {
-      client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
@@ -65,6 +65,49 @@ async function startApp() {
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
     const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === "U08RJ1PEM7X") || { ts: undefined }).ts || body.message!.ts) });
     await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam^S0AEHJ45EHE>` });
+  });
+
+  app.command("/spacetime", async ({ command, ack, client }) => {
+    ack();
+    await client.chat.postMessage({
+      channel: "C0ADRH7KXN1", text: `hey <@U08RJ1PEM7X>! <@${command.user_id}> is requesting to join <#C0ADRH7KXN1>.`, blocks: [
+        { type: "section", text: { type: "mrkdwn", text: `hey <@U08RJ1PEM7X>! <@${command.user_id}> is requesting to join <#C0ADRH7KXN1>.` } },
+        {
+          type: "actions", elements: [
+            { type: "button", text: { type: "plain_text", emoji: true, text: ":door: open the door" }, style: "primary", value: `${command.user_id}`, action_id: "spacetime_allow" },
+            { type: "button", text: { type: "plain_text", emoji: true, text: ":lock: turn away" }, style: "danger", value: `${command.user_id}`, action_id: "spacetime_reject" }
+          ]
+        }
+      ]
+    });
+  });
+  app.action(/^spacetime_(allow|reject)/, async ({ action, ack, body, client }) => {
+    ack();
+    if (action.type !== "button" || body.type !== "block_actions") return;
+    if (!action.value) {
+      app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given a user ID)!`);
+      return;
+    }
+    const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
+     if (body.user.id !== "U08RJ1PEM7X") {
+      await client.chat.postEphemeral({ text: "only nova can allow/reject people from joining, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      return;
+    }
+    if (body.actions[0]?.action_id === "spacetime_allow") {
+      try {
+        await client.conversations.invite({ channel: "C0ADRH7KXN1", users: action.value });
+      } catch (e) {
+        app.logger.error(`Couldn't invite ${action.value} to ${body.channel!.id}!\n${e}`);
+        await client.chat.postEphemeral({ text: "error adding the user to the channel :(", channel: body.channel!.id, user: body.user.id });
+      }
+      blocks.push({ type: "section", text: { type: "mrkdwn", text: ":white_check_mark: _the door creaks open..._" } });
+      await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
+      await client.chat.postMessage({ channel: action.value, text: `_the door creaks open..._\nyou have been allowed into <#${body.channel!.id}>!` });
+    } else if (body.actions[0]?.action_id === "spacetime_reject") {
+      blocks.push({ type: "section", text: { type: "mrkdwn", text: ":x: _the door remains locked..._" } });
+      await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
+      await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> was denied.` });
+    } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
   //await dailyRecap(app);
