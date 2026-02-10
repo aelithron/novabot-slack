@@ -2,17 +2,18 @@ FROM node:24-alpine
 USER root
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+RUN mkdir /pnpm
+RUN apk update && apk add --no-cache libc6-compat
+RUN corepack enable && corepack prepare pnpm --activate 
 
 COPY package.json ./
-COPY pnpm-lock.yml ./
-RUN pnpm ci
-RUN pnpm add --global typescript
+COPY pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile && pnpm add -g typescript
+COPY src/ ./
+COPY tsconfig.json ./
 RUN pnpm run build
-COPY dist/ ./
-COPY example.config.json ./
 
 EXPOSE 3000
 ENV PORT 3000
 LABEL org.opencontainers.image.source="https://github.com/aelithron/novabot-slack"
-CMD ["node", "index.js"]
+CMD ["node", "dist/index.js"]

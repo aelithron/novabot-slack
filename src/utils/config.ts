@@ -18,13 +18,13 @@ export const Config = z.object({
   recapReminderCron: z.string().nullable()
 });
 export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
-  const configPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../config/config.json');
+  const configPath = path.join(path.dirname(fileURLToPath(import.meta.url)), '../../config/config.json');
   try {
     await fs.access(configPath, fs.constants.F_OK | fs.constants.R_OK);
   } catch {
     getApp().logger.warn("config - default config is missing, copying...");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
-    await fs.copyFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "../example.config.json"), configPath, fs.constants.COPYFILE_EXCL);
+    await fs.copyFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "../../example.config.json"), configPath, fs.constants.COPYFILE_EXCL);
   }
   return Config.parse(JSON.parse(await fs.readFile(configPath, "utf8")));
 }
