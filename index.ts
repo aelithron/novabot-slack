@@ -123,7 +123,6 @@ async function startApp() {
   });
   if (config.recapReminderCron) nodeCron.schedule(config.recapReminderCron, async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: "hii nova! your daily recap is in 10 minutes, you may want to get ready to send it!" }), { timezone: config.owner.timezone });
   nodeCron.schedule(config.recapCron, async () => await dailyRecap(app), { timezone: config.owner.timezone });
-  //await dailyRecap(app);
 }
 startApp();
 export function getApp() { return app; }

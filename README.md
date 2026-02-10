@@ -19,7 +19,7 @@ Right now, you can use the bot in [#novabot-playground](https://hackclub.enterpr
 Some steps on how to self host the bot!
 1. Set up an app on [Slack's API portal](https://api.slack.com/apps). You can use the manifest in [`slack-manifest.json`](https://raw.githubusercontent.com/aelithron/novabot-slack/refs/heads/main/slack-manifest.json), feel free to change it as you wish.
 2. Decide if you want to use Socket Mode. It means you don't need to open a port, but it's slower and generally not recommended for production. The manifest currently has it enabled by default, though.
-3. Deploy the app, following the instructions below for your platform choice. Then, skip down to step 4.
+3. Deploy the app, following the instructions below for your platform choice. Then, skip down to step 4. Make sure you replace the placeholders with the appropriate values from the Slack API portal.
 #### With Docker Compose
 Save the following Compose file as `compose.yml` (making sure to fill in the placeholders):
 ```yaml
@@ -43,7 +43,7 @@ services:
       - ./config:/config
 ```
 #### With `docker run`
-Run this command in your terminal if you are using Socket Mode:
+Run this command in your terminal if you are using Socket Mode (filling in the empty spaces):
 ```bash
 docker run -d \
   --name novabot-slack \
@@ -54,7 +54,7 @@ docker run -d \
   --restart unless-stopped \
   ghcr.io/aelithron/novatea-slack:latest
 ```
-Alternatively, run this command if you are not using Socket Mode:
+Alternatively, run this command if you are not using Socket Mode (once again, filling in the empty spaces):
 ```bash
 docker run -d \
   --name novabot-slack \
