@@ -67,6 +67,6 @@ async function startApp() {
     await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam^S0AEHJ45EHE>` });
   });
   nodeCron.schedule("0 30 22 * * *", async () => await dailyRecap(app), { timezone: "America/Denver" });
-  await dailyRecap(app);
+  //await dailyRecap(app);
 }
 startApp();
