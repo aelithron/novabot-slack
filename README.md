@@ -1,7 +1,10 @@
-**⚠️ This project is not completed yet, and will have bugs! DO NOT use this in production.**
 # NovaBot - Slack ![IMG](https://hackatime-badge.hackclub.com/U08RJ1PEM7X/novabot-slack)
 Nova's personal bot for Slack! \
-This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com)!
+This project was made for Hack Club [Flavortown](https://flavortown.hackclub.com)! \
+<a href="https://notbyai.fyi" target="_blank">
+  <img src="https://raw.githubusercontent.com/aelithron/novabot-slack/refs/heads/main/not-by-ai.svg" alt="Developed by a human, not by AI!">
+</a>
+
 ## Features
 ### Daily Recaps
 The bot automatically posts a public message for me to talk about how my day went. It also automatically shows my status from [Universal Status](https://status.novatea.dev), a previous project of mine. \
