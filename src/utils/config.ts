@@ -26,7 +26,7 @@ export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
     getApp().logger.warn("config - default config is missing, copying...");
     await fs.mkdir(path.dirname(configPath), { recursive: true });
     await fs.copyFile(path.join(path.dirname(fileURLToPath(import.meta.url)), "../../example.config.json"), configPath, fs.constants.COPYFILE_EXCL);
-    await fs.chmod(configPath, 666);
+    await fs.chmod(configPath, 0o666);
   }
   return Config.parse(JSON.parse(await fs.readFile(configPath, "utf8")));
 }
