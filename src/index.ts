@@ -79,6 +79,17 @@ async function startApp() {
       await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `you're already in <#${config.channels.private}>! :3` });
       return;
     }
+    if (config.autoApproveJoinRequests) {
+      await client.chat.postMessage({ channel: config.channels.private, text: `hey! <@${command.user_id}> is requesting to join <#${config.channels.private}>.\n:white_check_mark: _the door creaks open..._\n(automatic approvals are enabled in my config!)` });
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `_you turn the doorknob, and the door creaks open..._\nyou have been allowed into <#${config.channels.private}>!` });
+      try {
+        await client.conversations.invite({ channel: config.channels.private, users: command.user_id });
+      } catch (e) {
+        app.logger.error(`Couldn't invite ${command.user_id} to ${config.channels.private}!\n${e}`);
+        await client.chat.postEphemeral({ text: "there was an error adding you to the channel :(", channel: command.channel_id, user: command.user_id });
+      }
+      return;
+    }
     await client.chat.postMessage({
       channel: config.channels.private, text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.private}>.`, blocks: [
         { type: "section", text: { type: "mrkdwn", text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.private}>.` } },
@@ -101,7 +112,7 @@ async function startApp() {
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
-     if (body.user.id !== config.owner.userID) {
+    if (body.user.id !== config.owner.userID) {
       await client.chat.postEphemeral({ text: "only nova can allow/reject people from joining, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
       return;
     }

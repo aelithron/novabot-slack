@@ -9,5 +9,6 @@
     "private": "C0ADRH7KXN1"
   },
   "recapCron": "0 30 22 * * *",
-  "recapReminderCron": "0 20 22 * * *"
+  "recapReminderCron": "0 20 22 * * *",
+  "autoApproveJoinRequests": false
 }
