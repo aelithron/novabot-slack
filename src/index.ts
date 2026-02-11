@@ -99,6 +99,7 @@ async function startApp() {
       app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given a user ID)!`);
       return;
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
      if (body.user.id !== config.owner.userID) {
       await client.chat.postEphemeral({ text: "only nova can allow/reject people from joining, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });

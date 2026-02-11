@@ -52,7 +52,7 @@ docker run -d \
   -e SOCKET_MODE=true \
   -v "$(pwd)/config:/config" \
   --restart unless-stopped \
-  ghcr.io/aelithron/novatea-slack:latest
+  ghcr.io/aelithron/novabot-slack:latest
 ```
 Alternatively, run this command if you are not using Socket Mode (once again, filling in the empty spaces):
 ```bash
@@ -64,6 +64,6 @@ docker run -d \
   -p 3000:3000 \
   -v "$(pwd)/config:/config" \
   --restart unless-stopped \
-  ghcr.io/aelithron/novatea-slack:latest
+  ghcr.io/aelithron/novabot-slack:latest
 ```
 4. Edit the config file to match your details. This should automatically generate when you start the bot for the first time.

@@ -10,6 +10,7 @@ export default async function dailyRecap(app: App) {
 	} catch (e) {
 		app.logger.error(`couldn't get the status from Universal Status!\n${e}`);
 	}
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const recapBlocks: any[] = [{ type: "section", text: { type: "mrkdwn", text: `hi <@${config.owner.userID}>, daily recap time! how was your day? :3` } }];
 	if (status) recapBlocks.push({ type: "section", text: { type: "mrkdwn", text: `nova's current status: *${status.emoji} ${status.status}*` } });
 	recapBlocks.push({ type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: ":crescent_moon: done!", emoji: true }, action_id: "public_daily_recap" }] });
@@ -28,6 +29,7 @@ export async function privateRecap(app: App, permaLink?: string) {
 	} catch (e) {
 		app.logger.error(`couldn't get the status from Universal Status!\n${e}`);
 	}
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	const recapBlocks: any[] = [{ type: "section", text: { type: "mrkdwn", text: `<@${config.owner.userID}>, private recap time! :3\n${permaLink ? `while you wait, you can look at <${permaLink}|the public recap>!` : ""}` } }];
 	if (status) recapBlocks.push({ type: "section", text: { type: "mrkdwn", text: `nova's current status: *${status.emoji} ${status.status}*` } });
 	recapBlocks.push({ type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: ":crescent_moon: done!", emoji: true }, value: permaLink || "", action_id: "private_daily_recap" }] });
