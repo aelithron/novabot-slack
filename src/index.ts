@@ -41,7 +41,8 @@ async function startApp() {
     }
   });
   app.message(":thread:", async ({ message, say }) => {
-    if (message.type === "message" && message.subtype === undefined && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
+    console.log(message);
+    if (message.type === "message" && (message.subtype === undefined || message.subtype === "file_share") && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
   });
 
   app.action("public_daily_recap", async ({ action, ack, body, client }) => {
