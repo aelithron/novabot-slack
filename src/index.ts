@@ -48,7 +48,7 @@ async function startApp() {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (body.user.id !== config.owner.userID) {
-      await client.chat.postEphemeral({ text: `only nova can complete daily recaps, silly :sillybleh:`, channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: `only ${config.owner.name} can complete daily recaps, silly :sillybleh:`, channel: body.channel!.id, user: body.user.id });
       return;
     }
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
@@ -56,13 +56,14 @@ async function startApp() {
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
     const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === config.owner.userID) || { ts: undefined }).ts || body.message!.ts) });
+    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s recap> is done now!${config.recaps.publicPing ? ` <!subteam^${config.recaps.publicPing}>` : ""}` });
     await privateRecap(app, permaLink.permalink);
   });
   app.action("private_daily_recap", async ({ action, ack, body, client }) => {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (body.user.id !== config.owner.userID) {
-      await client.chat.postEphemeral({ text: "only nova can complete daily recaps, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: `only ${config.owner.name} can complete daily recaps, silly :sillybleh:`, channel: body.channel!.id, user: body.user.id });
       return;
     }
     await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks: (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions") });
@@ -70,10 +71,10 @@ async function startApp() {
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
     const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === config.owner.userID) || { ts: undefined }).ts || body.message!.ts) });
-    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|nova's recap> is done now! <!subteam^S0AEHJ45EHE>` });
+    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s private recap> is done now!${config.recaps.privatePing ? ` <!subteam^${config.recaps.privatePing}>` : ""}` });
   });
 
-  app.command("/spacetime", async ({ command, ack, client }) => {
+  app.command(config.privateChannelCommand, async ({ command, ack, client }) => {
     ack();
     if ((await client.conversations.members({ channel: config.channels.private })).members!.includes(command.user_id)) {
       await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `you're already in <#${config.channels.private}>! :3` });
@@ -113,7 +114,7 @@ async function startApp() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const blocks: any[] = (body.message!.blocks as { type: string }[]).filter((block) => block.type !== "actions");
     if (body.user.id !== config.owner.userID) {
-      await client.chat.postEphemeral({ text: "only nova can allow/reject people from joining, silly :sillybleh:", channel: body.channel!.id, user: body.user.id });
+      await client.chat.postEphemeral({ text: `only ${config.owner.name} can allow/reject people from joining, silly :sillybleh:`, channel: body.channel!.id, user: body.user.id });
       return;
     }
     if (body.actions[0]?.action_id === "spacetime_allow") {
@@ -130,11 +131,11 @@ async function startApp() {
     } else if (body.actions[0]?.action_id === "spacetime_reject") {
       blocks.push({ type: "section", text: { type: "mrkdwn", text: ":x: _the door remains locked..._" } });
       await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
-      await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (nova's private channel) was denied.` });
+      await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (${config.owner.name}'s private channel) was denied.` });
     } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
-  if (config.recapReminderCron) nodeCron.schedule(config.recapReminderCron, async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: "hii nova! your daily recap is in 10 minutes, you may want to get ready to send it!" }), { timezone: config.owner.timezone });
-  nodeCron.schedule(config.recapCron, async () => await dailyRecap(app), { timezone: config.owner.timezone });
+  if (config.recaps.reminderCron) nodeCron.schedule(config.recaps.reminderCron, async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }), { timezone: config.owner.timezone });
+  nodeCron.schedule(config.recaps.cron, async () => await dailyRecap(app), { timezone: config.owner.timezone });
 }
 startApp();
 export function getApp() { return app; }

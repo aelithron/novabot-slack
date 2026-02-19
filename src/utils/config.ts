@@ -7,6 +7,7 @@ import { getApp } from "../index.js";
 export const Config = z.object({
   owner: z.object({
     userID: z.string(),
+    name: z.string().default("nova"),
     email: z.string(),
     timezone: z.string()
   }),
@@ -14,8 +15,13 @@ export const Config = z.object({
     public: z.string(),
     private: z.string()
   }),
-  recapCron: z.string(),
-  recapReminderCron: z.string().nullable(),
+  recaps: z.object({
+    cron: z.string(),
+    reminderCron: z.string().nullable(),
+    publicPing: z.string().nullable(),
+    privatePing: z.string().nullable()
+  }),
+  privateChannelCommand: z.string().default("/spacetime"),
   autoApproveJoinRequests: z.boolean().default(false)
 });
 export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
