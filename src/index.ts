@@ -1,10 +1,10 @@
 import { App } from "@slack/bolt";
 import dotenv from "dotenv";
-import nodeCron from "node-cron";
 import dailyRecap, { privateRecap } from "./recaps.js";
 import type { Config } from "./utils/config.js";
 import * as z from "zod";
 import loadConfig from "./utils/config.js";
+import { Cron } from "croner";
 
 let app: App;
 let config: z.Infer<typeof Config>;
@@ -134,8 +134,8 @@ async function startApp() {
       await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (${config.owner.name}'s private channel) was denied.` });
     } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
-  if (config.recaps.reminderCron) nodeCron.schedule(config.recaps.reminderCron, async () => await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }), { timezone: config.owner.timezone });
-  nodeCron.schedule(config.recaps.cron, async () => await dailyRecap(app), { timezone: config.owner.timezone });
+  if (config.recaps.reminderCron) new Cron(config.recaps.reminderCron, { timezone: config.owner.timezone }, async () => { await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }); });
+  new Cron(config.recaps.cron!, { timezone: config.owner.timezone }, async () => await dailyRecap(app));
 }
 startApp();
 export function getApp() { return app; }

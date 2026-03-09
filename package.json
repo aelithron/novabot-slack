@@ -15,15 +15,14 @@
   "license": "MIT",
   "dependencies": {
     "@slack/bolt": "^4.6.0",
+    "croner": "^10.0.1",
     "dotenv": "^17.2.4",
-    "node-cron": "^4.2.1",
     "typescript": "^5.9.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/node": "^25.2.1",
-    "@types/node-cron": "^3.0.11",
     "eslint": "^10.0.0",
     "globals": "^17.3.0",
     "jiti": "^2.6.1",
