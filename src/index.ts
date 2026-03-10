@@ -56,8 +56,8 @@ async function startApp() {
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
     const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === config.owner.userID) || { ts: undefined }).ts || body.message!.ts) });
-    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s recap> is done now!${config.recaps.publicPing ? ` <!subteam^${config.recaps.publicPing}>` : ""}` });
-    await privateRecap(app, permaLink.permalink);
+    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s recap> is done now!${config.recaps.primaryPing ? ` <!subteam^${config.recaps.primaryPing}>` : ""}` });
+    if (config.channels.secondary) await privateRecap(app, permaLink.permalink);
   });
   app.action("private_daily_recap", async ({ action, ack, body, client }) => {
     ack();
@@ -71,29 +71,34 @@ async function startApp() {
     await client.reactions.add({ channel: body.channel!.id, timestamp: body.message!.ts, name: "sparkles" });
     const recapMessage = await client.conversations.replies({ channel: body.channel!.id, ts: body.message!.ts });
     const permaLink = await client.chat.getPermalink({ channel: body.channel!.id, message_ts: ((recapMessage.messages!.find((msg) => msg.user === config.owner.userID) || { ts: undefined }).ts || body.message!.ts) });
-    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s private recap> is done now!${config.recaps.privatePing ? ` <!subteam^${config.recaps.privatePing}>` : ""}` });
+    await client.chat.postMessage({ channel: body.channel!.id, markdown_text: `:cat-heart: <${permaLink.permalink}|${config.owner.name}'s private recap> is done now!${config.recaps.secondaryPing ? ` <!subteam^${config.recaps.secondaryPing}>` : ""}` });
   });
 
-  app.command(config.privateChannelCommand, async ({ command, ack, client }) => {
+  app.command(config.secondaryChannelCommand || "/spacetime", async ({ command, ack, client }) => {
     ack();
-    if ((await client.conversations.members({ channel: config.channels.private })).members!.includes(command.user_id)) {
-      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `you're already in <#${config.channels.private}>! :3` });
+    if (!config.channels.secondary || !config.secondaryChannelCommand) {
+      app.logger.error(`no secondary channel is present in the config, so the join secondary channel command cannot be used! please unregister this command in the Slack API dashboard, or configure it fully.`);
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `i'm not configured to support this right now! :(` });
+      return;
+    }
+    if ((await client.conversations.members({ channel: config.channels.secondary })).members!.includes(command.user_id)) {
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `you're already in <#${config.channels.secondary}>! :3` });
       return;
     }
     if (config.autoApproveJoinRequests) {
-      await client.chat.postMessage({ channel: config.channels.private, text: `hey! <@${command.user_id}> is requesting to join <#${config.channels.private}>.\n:white_check_mark: _the door creaks open..._\n(automatic approvals are enabled in my config!)` });
-      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `_you turn the doorknob, and the door creaks open..._\nyou have been allowed into <#${config.channels.private}>!` });
+      await client.chat.postMessage({ channel: config.channels.secondary, text: `hey! <@${command.user_id}> is requesting to join <#${config.channels.secondary}>.\n:white_check_mark: _the door creaks open..._\n(automatic approvals are enabled in my config!)` });
+      await client.chat.postEphemeral({ channel: command.channel_id, user: command.user_id, text: `_you turn the doorknob, and the door creaks open..._\nyou have been allowed into <#${config.channels.secondary}>!` });
       try {
-        await client.conversations.invite({ channel: config.channels.private, users: command.user_id });
+        await client.conversations.invite({ channel: config.channels.secondary, users: command.user_id });
       } catch (e) {
-        app.logger.error(`Couldn't invite ${command.user_id} to ${config.channels.private}!\n${e}`);
+        app.logger.error(`couldn't invite ${command.user_id} to ${config.channels.secondary}!\n${e}`);
         await client.chat.postEphemeral({ text: "there was an error adding you to the channel :(", channel: command.channel_id, user: command.user_id });
       }
       return;
     }
     await client.chat.postMessage({
-      channel: config.channels.private, text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.private}>.`, blocks: [
-        { type: "section", text: { type: "mrkdwn", text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.private}>.` } },
+      channel: config.channels.secondary, text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.secondary}>.`, blocks: [
+        { type: "section", text: { type: "mrkdwn", text: `hey <@${config.owner.userID}>! <@${command.user_id}> is requesting to join <#${config.channels.secondary}>.` } },
         {
           type: "actions", elements: [
             { type: "button", text: { type: "plain_text", emoji: true, text: ":door: open the door" }, style: "primary", value: `${command.user_id}`, action_id: "spacetime_allow" },
@@ -108,7 +113,11 @@ async function startApp() {
     ack();
     if (action.type !== "button" || body.type !== "block_actions") return;
     if (!action.value) {
-      app.logger.error(`Action ${body.actions[0]?.action_id} didn't pass a value (when it should have given a user ID)!`);
+      app.logger.error(`action ${body.actions[0]?.action_id} didn't pass a value (when it should have given a user ID)!`);
+      return;
+    }
+    if (!config.channels.secondary) {
+      app.logger.error(`no secondary channel is present in the config, so the join command cannot be used!`);
       return;
     }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -119,9 +128,9 @@ async function startApp() {
     }
     if (body.actions[0]?.action_id === "spacetime_allow") {
       try {
-        await client.conversations.invite({ channel: config.channels.private, users: action.value });
+        await client.conversations.invite({ channel: config.channels.secondary, users: action.value });
       } catch (e) {
-        app.logger.error(`Couldn't invite ${action.value} to ${body.channel!.id}!\n${e}`);
+        app.logger.error(`couldn't invite ${action.value} to ${body.channel!.id}!\n${e}`);
         await client.chat.postEphemeral({ text: "error adding the user to the channel :(", channel: body.channel!.id, user: body.user.id });
         return;
       }
@@ -132,7 +141,7 @@ async function startApp() {
       blocks.push({ type: "section", text: { type: "mrkdwn", text: ":x: _the door remains locked..._" } });
       await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
       await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (${config.owner.name}'s private channel) was denied.` });
-    } else app.logger.error(`Action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
+    } else app.logger.error(`action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
   if (config.recaps.reminderCron) new Cron(config.recaps.reminderCron, { timezone: config.owner.timezone }, async () => { await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }); });
   new Cron(config.recaps.cron!, { timezone: config.owner.timezone }, async () => await dailyRecap(app));

@@ -6,15 +6,15 @@
     "timezone": "America/Denver"
   },
   "channels": {
-    "public": "C0ADSBWENAY",
-    "private": "C0ADRH7KXN1"
+    "primary": "C0ADSBWENAY",
+    "secondary": "C0ADRH7KXN1"
   },
   "recaps": {
     "cron": "0 30 22 * * *",
     "reminderCron": "0 20 22 * * *",
-    "publicPing": "S0AEHJ45EHE",
-    "privatePing": "S0AEHJ45EHE"
+    "primaryPing": "S0AEHJ45EHE",
+    "secondaryPing": "S0AEHJ45EHE"
   },
-  "privateChannelCommand": "/spacetime",
+  "secondaryChannelCommand": "/spacetime",
   "autoApproveJoinRequests": false
 }

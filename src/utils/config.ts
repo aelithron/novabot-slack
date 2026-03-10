@@ -8,20 +8,20 @@ export const Config = z.object({
   owner: z.object({
     userID: z.string(),
     name: z.string().default("nova"),
-    email: z.string(),
+    email: z.string().nullable(),
     timezone: z.string()
   }),
   channels: z.object({
-    public: z.string(),
-    private: z.string()
+    primary: z.string(),
+    secondary: z.string().nullable()
   }),
   recaps: z.object({
     cron: z.string(),
     reminderCron: z.string().nullable(),
-    publicPing: z.string().nullable(),
-    privatePing: z.string().nullable()
+    primaryPing: z.string().nullable(),
+    secondaryPing: z.string().nullable()
   }),
-  privateChannelCommand: z.string().default("/spacetime"),
+  secondaryChannelCommand: z.string().default("/spacetime").nullable(),
   autoApproveJoinRequests: z.boolean().default(false)
 });
 export default async function loadConfig(): Promise<z.Infer<typeof Config>> {
