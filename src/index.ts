@@ -144,7 +144,7 @@ async function startApp() {
     } else app.logger.error(`action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
   });
   if (config.recaps.reminderCron) new Cron(config.recaps.reminderCron, { timezone: config.owner.timezone }, async () => { await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }); });
-  new Cron(config.recaps.cron!, { timezone: config.owner.timezone }, async () => await dailyRecap(app));
+  if (config.recaps.cron) new Cron(config.recaps.cron, { timezone: config.owner.timezone }, async () => await dailyRecap(app));
 }
 startApp();
 export function getApp() { return app; }

@@ -16,7 +16,7 @@ export const Config = z.object({
     secondary: z.string().nullable()
   }),
   recaps: z.object({
-    cron: z.string(),
+    cron: z.string().nullable(),
     reminderCron: z.string().nullable(),
     primaryPing: z.string().nullable(),
     secondaryPing: z.string().nullable()
