@@ -40,8 +40,17 @@ async function startApp() {
       }
     }
   });
-  app.message(":thread:", async ({ message, say }) => {
-    if (message.type === "message" && (message.subtype === undefined || message.subtype === "file_share") && message.text?.match(/!subteam\^([A-Z0-9]+)/) && message.thread_ts === undefined) say(":thread: thread here!");
+  app.message(/!subteam\^([A-Z0-9]+)/, async ({ message, client, say }) => {
+    if (message.type === "message" && (message.subtype === undefined || message.subtype === "file_share") && message.thread_ts === undefined) {
+      if (message.text?.includes(":thread:")) {
+        say(":thread: thread here!");
+      } else {
+        await client.chat.postEphemeral({ channel: message.channel, user: message.user, text: "do you want to send a message for people to thread on?", blocks: [
+          { type: "section", text: { type: "mrkdwn", text: "do you want to send a message for people to thread on?" } },
+          { type: "actions", elements: [{ type: "button", text: { type: "plain_text", text: "yes", emoji: true }, action_id: "send_thread_msg", style: "primary" }, { type: "button", text: { type: "plain_text", text: "no", emoji: true }, action_id: "dismiss_thread_msg", style: "danger" }] }
+        ]});
+      }
+    }
   });
 
   app.action("public_daily_recap", async ({ action, ack, body, client }) => {
@@ -142,6 +151,15 @@ async function startApp() {
       await client.chat.update({ channel: body.channel!.id, ts: body.message!.ts, blocks });
       await client.chat.postMessage({ channel: action.value, text: `_you try the knob, but it doesn't budge..._\nsorry, but your request to join <#${body.channel!.id}> (${config.owner.name}'s private channel) was denied.` });
     } else app.logger.error(`action ${body.actions[0]?.action_id} was not either of the intended values (spacetime_allow or spacetime_reject)!`);
+  });
+  app.action("send_thread_msg", async ({ ack, body, client, respond }) => {
+    ack();
+    await client.chat.postMessage({ channel: body.channel!.id!, text: ":thread: thread here!" });
+    await respond({ delete_original: true });
+  });
+  app.action("dismiss_thread_msg", async ({ ack, respond }) => {
+    ack();
+    await respond({ delete_original: true });
   });
   if (config.recaps.reminderCron) new Cron(config.recaps.reminderCron, { timezone: config.owner.timezone }, async () => { await app.client.chat.postMessage({ channel: config.owner.userID, text: `hii ${config.owner.name}! your daily recap is in 10 minutes, you may want to get ready to send it!` }); });
   if (config.recaps.cron) new Cron(config.recaps.cron, { timezone: config.owner.timezone }, async () => await dailyRecap(app));
