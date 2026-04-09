@@ -70,5 +70,7 @@ docker run -d \
   ghcr.io/aelithron/novabot-slack:latest
 ```
 4. Edit the config file to match your details. This should automatically generate when you start the bot for the first time.
-
+## Showcase
+![IMG](https://github.com/aelithron/novabot-slack/blob/main/extras/showcase.png)
+![IMG](https://github.com/aelithron/novabot-slack/blob/main/extras/showcase2.png)
 *Want to check out the Discord version? [NovaBot Discord](https://github.com/aelithron/novabot)*
